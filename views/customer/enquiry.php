@@ -33,10 +33,10 @@ use yii\helpers\Url;
 			<textarea id="enqMessage" class="form-control" rows="5"></textarea> 
 		</div>
 		<div class="mt-2">
-			<button class="btn btn-primary" onClick="enqFn()">Enquire</button>
+			<button class="btn btn-primary" onClick="enqFn()" id="enqBtn">Enquire</button>
 		</div>
 
-
+		<div id="msg"></div>
 	</div>
 </div>
 
@@ -73,9 +73,15 @@ use yii\helpers\Url;
                         $("#enqContact").val("");
                         $("#enqAddress").val("");
                         $("#enqMessage").val("");
+                        $("#enqBtn").prop("disabled", true);
+                        msg = "<div class='alert alert-dark mt-3'>Enquiry Submitted</div>"; 
+                        $("#msg").html(msg);
                     } else {
                         console.log('Error: ' + resp.error);
+                        msg = "<div class='alert alert-dark mt-3'>Sorry! Enquiry was not submitted.</div>"; 
+                        $("#msg").html(msg);
                     }
+                
                 },
                 error: function(xhr, status, error) {
                     console.log('Error: ' + error);

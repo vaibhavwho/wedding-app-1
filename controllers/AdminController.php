@@ -5,13 +5,16 @@ use yii\web\Controller;
 use app\models\Packages;
 use Exception;
 use Yii;
+use app\models\Transaction;
 
 class AdminController extends Controller
 {
     public function actionIndex() {
         $model = Packages::find()->all();
+        $transactions = Transaction::find()->all();
         return $this->render('index', [
             'model' => $model,
+            'transactions' => $transactions
         ]);
     }
 

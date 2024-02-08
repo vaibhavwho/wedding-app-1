@@ -36,7 +36,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
         'brandUrl' => Yii::$app->homeUrl,
-        'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
+        'options' => ['class' => 'navbar-expand-md navbar-light bg-light fixed-top']
     ]);
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav ms-auto'],
@@ -51,7 +51,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             ]) : ('<li class="nav-item">' . Html::beginForm([
                 '/site/logout'
             ]) . Html::submitButton('Logout (' . Yii::$app->user->identity->username . ')', [
-                'class' => 'nav-link btn btn-link logout'
+                'class' => 'nav-link btn btn-link logout text-dark'
             ]) . Html::endForm() . '</li>'
                 
                 
