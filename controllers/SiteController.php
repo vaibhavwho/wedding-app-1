@@ -1,6 +1,7 @@
 <?php
 namespace app\controllers;
 
+use Exception;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -15,10 +16,7 @@ use app\models\Packages;
 class SiteController extends Controller
 {
 
-    /**
-     *
-     * {@inheritdoc}
-     */
+
     public function behaviors()
     {
         return [
@@ -50,10 +48,6 @@ class SiteController extends Controller
         ];
     }
 
-    /**
-     *
-     * {@inheritdoc}
-     */
     public function actions()
     {
         return [
@@ -67,54 +61,86 @@ class SiteController extends Controller
         ];
     }
 
-    /**
-     * Displays homepage.
-     *
-     * @return string
-     */
+
     public function actionIndex()
     {
-        $model = Packages::find()->all();
-        return $this->render('index', [
-            'model' => $model,
-        ]);
+        
+        if(!Yii::$app->user->isGuest){
+            
+            $id = Yii::$app->user->id;
+            $userType = User::find()->where(['id' => $id])->one();
+        
+            if($userType->accessType == 1){
+                return $this->redirect([
+                    '/admin/index'
+                ]);
+            } else if($userType->accessType == 2) {
+                return $this->redirect([
+                    '/customer/index'
+                ]);
+                
+            }     
+        }
+            $model = Packages::find()->all();
+            return $this->render('index', [
+                'model' => $model,
+            ]);
     }
 
     
     public function actionSignup()
     {
-        $user = new User();
-        
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $data = Yii::$app->request->post();
-            
-            $user->username = $data['User']['username'];
-            $password = $data['User']['password'];
-            //$password_repeat = $data['User']['password_repeat'];
-            $user->password = Yii::$app->security->generatePasswordHash($password);
-            //$user->password_repeat = Yii::$app->security->generatePasswordHash($password_repeat);
-            $user->accessType = $data['User']['accessType'];
-            $user->accessToken = Yii::$app->security->generateRandomString();
-            $user->authKey = Yii::$app->security->generateRandomString();
-        
-            if ($user->save()) {
-                return $this->goHome();
+        if(Yii::$app->user->isGuest){
+            $transaction = Yii::$app->db->beginTransaction();
+            $user = new User();
+           
+            try {
+                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                    $data = Yii::$app->request->post();
+                    
+                    $user->username = $data['User']['username'];
+                    $password = $data['User']['password'];
+                    //$password_repeat = $data['User']['password_repeat'];
+                    $user->password = Yii::$app->security->generatePasswordHash($password);
+                    //$user->password_repeat = Yii::$app->security->generatePasswordHash($password_repeat);
+                    $user->accessType = $data['User']['accessType'];
+                    $user->accessToken = Yii::$app->security->generateRandomString();
+                    $user->authKey = Yii::$app->security->generateRandomString();
+                    
+                
+                    if ($user->save()) {
+                        $transaction->commit();
+                        return $this->goHome();
+                    }
+                    
+                    Yii::error("User was not saved. " . VarDumper::dumpAsString($user->errors));
+                }
+            } catch (Exception $e) {
+                $transaction->rollBack();
             }
             
-            Yii::error("User was not saved. " . VarDumper::dumpAsString($user->errors));
+            return $this->render('signup', [
+                'model' => $user,
+            ]);
+        } else {
+            
+            $id = Yii::$app->user->id;
+            $userType = User::find()->where(['id' => $id])->one();
+            
+            if($userType->accessType == 1){
+                return $this->redirect([
+                    '/admin/index'
+                ]);
+            } else if($userType->accessType == 2) {
+                return $this->redirect([
+                    '/customer/index'
+                ]);
+                
+            } 
         }
-        
-        return $this->render('signup', [
-            'model' => $user,
-        ]);
     }
     
-    
-    /**
-     * Login action.
-     *
-     * @return Response|string
-     */
+
     public function actionLogin()
     {
         if (! Yii::$app->user->isGuest) {
@@ -143,11 +169,6 @@ class SiteController extends Controller
         ]);
     }
 
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
     public function actionLogout()
     {
         Yii::$app->user->logout();
@@ -155,29 +176,22 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
+
+    public function actionSearch()
     {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model
-        ]);
+        $searchText = Yii::$app->request->post('searchText');
+        $searchedModel = Packages::find()->where(['package_name' => $searchText])->one();
+            if($searchedModel){
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return['success' => true, 'id' => $searchedModel->id, 'package_name' => $searchedModel->package_name, 'package_description' => $searchedModel->package_description, 'package_lacation' => $searchedModel->package_location, 'package_review' => $searchedModel->package_review, 'package_price' => $searchedModel->package_price,];
+            }else {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return['success' => false];
+            }
+        return $this->render('index');
     }
+    
 
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
     public function actionAbout()
     {
         return $this->render('about');

@@ -13,27 +13,61 @@ class CustomerController extends Controller
 {
     public function actionIndex()
     {
-        $user = Yii::$app->user->id;
         
-        try {
-            $purchasedPackages = Transaction::find()
-            ->select(['product_id'])
-            ->where(['customer_id' => $user])
-            ->column();
-            $allPackages = Packages::find()->all();
+        if(!Yii::$app->user->isGuest){
             
-            return $this->render('index', [
-                'model' => $allPackages, 
-                'purchasedPackages' => $purchasedPackages,
-            ]);
-        } catch (\Exception $e) {
-            Yii::error('Error: ' . $e->getMessage());
-            return "error";
+            $id = Yii::$app->user->id;
+            $userType = User::find()->where(['id' => $id])->one();
+            
+            if($userType->accessType == 1){
+                return $this->redirect([
+                    '/admin/index'
+                ]);
+            } else if($userType->accessType == 2) {
+                $transaction = Yii::$app->db->beginTransaction();
+                $user = Yii::$app->user->id;
+                
+                try {
+                    $purchasedPackages = Transaction::find()
+                    ->select(['product_id'])
+                    ->where(['customer_id' => $user])
+                    ->column();
+                    $allPackages = Packages::find()->all();
+                    $transaction->commit();
+                    return $this->render('index', [
+                        'model' => $allPackages,
+                        'purchasedPackages' => $purchasedPackages,
+                    ]);
+                } catch (\Exception $e) {
+                    Yii::error('Error: ' . $e->getMessage());
+                    $transaction->rollBack();
+                    return "error";
+                }
+                
+            }
         }
+        
+        return $this->goHome();
+        
+
     }
     
     
     public function actionEnquiry($id) {
+        if(Yii::$app->user->isGuest){
+            return $this->redirect([
+                'site/index'
+            ]);
+        }
+        
+        $idType = Yii::$app->user->id;
+        $isAdmin =  User::find()->where(['id' => $idType])->one();
+        if($isAdmin->accessType == 1){
+            return $this->redirect([
+                'admin/index'
+            ]);
+        }
+        $transaction = Yii::$app->db->beginTransaction();
         $model = Packages::findOne(['id' => $id]);
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $data = new Enquiry();
@@ -50,6 +84,7 @@ class CustomerController extends Controller
                 $data->enqMessage = $postData['enqMessage'];
                 
                 if($data->save()){
+                    $transaction->commit();
                     Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                     return ['success' => true];
                 } else {
@@ -58,7 +93,7 @@ class CustomerController extends Controller
                 }      
                 
             } catch (Exception $e) {
-                //$transaction->rollBack();
+                $transaction->rollBack();
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                 return ['success' => false, 'error' => $e->getMessage()];
             }
@@ -69,6 +104,22 @@ class CustomerController extends Controller
     }
     
     public function actionBuypackage($id) {
+        if(Yii::$app->user->isGuest){
+            return $this->redirect([
+                'site/index'
+            ]);
+        }
+        
+        
+        $idType = Yii::$app->user->id;
+        $isAdmin =  User::find()->where(['id' => $idType])->one();
+        if($isAdmin->accessType == 1){
+            return $this->redirect([
+                'admin/index'
+            ]);
+        }
+        
+        $transaction = Yii::$app->db->beginTransaction();
         $model = Packages::findOne(['id' => $id]);
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $data = new Transaction();
@@ -82,6 +133,7 @@ class CustomerController extends Controller
                 $data->amount = $postData['amount'];
                 $data->purchase_date = date('Y-m-d H:i:s');
                 if($data->save()){
+                    $transaction->commit();
                     Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                     return ['success' => true];
                 } else {
@@ -90,7 +142,7 @@ class CustomerController extends Controller
                 }
                 
             } catch (Exception $e) {
-                //$transaction->rollBack();
+                $transaction->rollBack();
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                 return ['success' => false, 'error' => $e->getMessage()];
             }

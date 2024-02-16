@@ -34,10 +34,10 @@ use yii\helpers\Url;
 				class="form-control">
 		</div>
 		<div class="mt-2">
-			<button class="btn btn-primary" onClick="updatefn()">Update</button>
+			<button class="btn btn-primary" id="updateBtn" onClick="updatefn()">Update</button>
 		</div>
 
-
+		<div id="msg"></div>
 	</div>
 </div>
 
@@ -71,8 +71,14 @@ use yii\helpers\Url;
                 success: function (resp) {
                     if (resp.success) {
                         console.log('Updated successfully');
+                        msg = "<div class='alert alert-dark mt-3'>'Updated successfully'</div>"; 
+                        $("#msg").html(msg);
+                        $("#updateBtn").prop("disabled", true);
+
                     } else {
                         console.log('Error: ' + resp.error);
+                        msg = "<div class='alert alert-dark mt-3'>'Updatation Failed'</div>"; 
+                        $("#msg").html(msg);
                     }
                 },
                 error: function(xhr, status, error) {

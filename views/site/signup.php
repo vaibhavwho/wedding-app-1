@@ -18,10 +18,20 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $form->field($model, 'password')->passwordInput() ?>
 
-    <?= $form->field($model, 'accessType')->dropDownList([
-        \app\models\User::ACCESS_TYPE_ADMIN => 'Admin',
-        \app\models\User::ACCESS_TYPE_CUSTOMER => 'Customer',
-    ]) ?>
+    <?= $form->field($model, 'accessType')->dropDownList(
+        [
+            \app\models\User::ACCESS_TYPE_CUSTOMER => 'Customer',
+            \app\models\User::ACCESS_TYPE_ADMIN => 'Admin',
+        ],
+        [
+            'options' => [
+                \app\models\User::ACCESS_TYPE_ADMIN => ['disabled' => true],
+            ],
+            'value' => \app\models\User::ACCESS_TYPE_CUSTOMER,
+        ]
+    )->label(false) ?>
+
+    
 
     <div class="form-group">
         <?= Html::submitButton('Signup', ['class' => 'btn btn-primary', 'name' => 'signup-button']) ?>
@@ -34,3 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
      <p>Already have an account? <a class="link" href="/site/login">Log in here</a></p>
 </div>
 
+<script>
+	
+</script>

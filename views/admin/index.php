@@ -18,9 +18,19 @@ use yii\helpers\Html;
 			<div class="card card-bordered h-100">
 
 				<div class="card-pinned">
-					<img class="card-img-top"
-						src="<?= Yii::$app->urlManager->createUrl('/img/mehndi.webp')?>"
-						alt="Image Description">
+                <img class="card-img-top randomImage" src="<?= Yii::$app->urlManager->createUrl('/img/mehndi') ?>" alt="images">
+                
+                <script>
+                    window.onload = function() {
+                        
+                        let images = document.querySelectorAll('.randomImage');
+                        
+                        images.forEach(function(image) {
+                        let randomNum = Math.floor(Math.random() * 4) + 1;
+                            image.src += '(' + randomNum + ').webp';
+                        });
+                    };
+                </script>
 					<div class="card-pinned-top-start">
 						<small class="badge bg-success rounded-pill">Best Deal</small>
 					</div>

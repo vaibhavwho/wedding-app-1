@@ -31,9 +31,9 @@ use yii\helpers\Url;
 				type="text" id="reviewCreate" class="form-control">
 		</div>
 		<div class="mt-2">
-			<button class="btn btn-primary" onClick="createfn()">Create</button>
+			<button class="btn btn-primary" id="createBtn" onClick="createfn()">Create</button>
 		</div>
-
+		<div id="msg"></div>
 
 	</div>
 </div>
@@ -63,7 +63,10 @@ use yii\helpers\Url;
                 },
                 success: function (resp) {
                     if (resp.success) {
-                        console.log('Blog post saved successfully');
+                        console.log('Created successfully');
+                        msg = "<div class='alert alert-dark mt-3'>'Created successfully'</div>"; 
+                        $("#msg").html(msg);
+                        $("#createBtn").prop("disabled", true);
                         $("#titleCreate").val("");
                         $("#locationCreate").val("");
                         $("#descriptionCreate").val("");
@@ -71,6 +74,8 @@ use yii\helpers\Url;
                         $("#reviewCreate").val("");
                     } else {
                         console.log('Error: ' + resp.error);
+                         msg = "<div class='alert alert-dark mt-3'>'Creation Failed'</div>"; 
+                        $("#msg").html(msg);
                     }
                 },
                 error: function(xhr, status, error) {

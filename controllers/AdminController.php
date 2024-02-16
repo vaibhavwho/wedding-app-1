@@ -3,6 +3,7 @@ namespace app\controllers;
 
 use yii\web\Controller;
 use app\models\Packages;
+use app\models\User;
 use Exception;
 use Yii;
 use app\models\Transaction;
@@ -10,6 +11,21 @@ use app\models\Transaction;
 class AdminController extends Controller
 {
     public function actionIndex() {
+        
+        if(Yii::$app->user->isGuest){
+            return $this->redirect([
+                'site/index'
+            ]);
+        }
+        
+        $idType = Yii::$app->user->id;
+        $isAdmin =  User::find()->where(['id' => $idType])->one();
+        if($isAdmin->accessType == 2){
+            return $this->redirect([
+                'customer/index'
+            ]);
+        }
+        
         $model = Packages::find()->all();
         $transactions = Transaction::find()->all();
         return $this->render('index', [
@@ -20,6 +36,20 @@ class AdminController extends Controller
 
     public function actionCreate()
     {
+        if(Yii::$app->user->isGuest){
+            return $this->redirect([
+                'site/index'
+            ]);
+        }
+        
+        $idType = Yii::$app->user->id;
+        $isAdmin =  User::find()->where(['id' => $idType])->one();
+        if($isAdmin->accessType == 2){
+            return $this->redirect([
+                'customer/index'
+            ]);
+        }
+        
         $transaction = Yii::$app->db->beginTransaction();
         $model = new Packages();
         
@@ -57,6 +87,20 @@ class AdminController extends Controller
     
     public function actionUpdate($id)
     {
+        if(Yii::$app->user->isGuest){
+            return $this->redirect([
+                'site/index'
+            ]);
+        }
+        
+        $idType = Yii::$app->user->id;
+        $isAdmin =  User::find()->where(['id' => $idType])->one();
+        if($isAdmin->accessType == 2){
+            return $this->redirect([
+                'customer/index'
+            ]);
+        }
+        
         $transaction = Yii::$app->db->beginTransaction();
         //$data = new Blog();
         $model = Packages::findOne(['id' => $id]);
@@ -81,7 +125,7 @@ class AdminController extends Controller
                     return ['success' => true];
                 } else {
                     Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                    return ['success' => false, 'error' => 'Failed to save the blog post.'];
+                    return ['success' => false, 'error' => 'Failed to update.'];
                 }
             }
         } catch (Exception $e) {
@@ -97,6 +141,20 @@ class AdminController extends Controller
     
     public function actionDelete($id)
     {
+        if(Yii::$app->user->isGuest){
+            return $this->redirect([
+                'site/index'
+            ]);
+        }
+        
+        $idType = Yii::$app->user->id;
+        $isAdmin =  User::find()->where(['id' => $idType])->one();
+        if($isAdmin->accessType == 2){
+            return $this->redirect([
+                'customer/index'
+            ]);
+        }
+        
         $transaction = Yii::$app->db->beginTransaction();
         $model = Packages::findOne([
             'id' => $id
@@ -116,6 +174,20 @@ class AdminController extends Controller
     
     public function actionView($id)
     {
+        if(Yii::$app->user->isGuest){
+            return $this->redirect([
+                'site/index'
+            ]);
+        }
+        
+        $idType = Yii::$app->user->id;
+        $isAdmin =  User::find()->where(['id' => $idType])->one();
+        if($isAdmin->accessType == 2){
+            return $this->redirect([
+                'customer/index'
+            ]);
+        }
+        
         $model = Packages::findOne($id);
         return $this->render('view', [
             'model' => $model
