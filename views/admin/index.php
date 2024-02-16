@@ -13,7 +13,7 @@ use yii\helpers\Html;
 	    <?php
     foreach ($model as $item) :
         ?>
-		<div class="col mb-5">
+		<div class="col  mb-5">
 
 			<div class="card card-bordered h-100">
 
